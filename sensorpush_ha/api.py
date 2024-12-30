@@ -6,6 +6,7 @@ from asyncio import Lock
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
 from datetime import datetime, timedelta
 from functools import wraps
+import json
 import logging
 from typing import Any, Concatenate, Final
 
@@ -13,6 +14,7 @@ from sensorpush_api import (
     AccessTokenRequest,
     ApiApi,
     ApiClient,
+    ApiException,
     AuthorizeRequest,
     Configuration,
     Samples,
@@ -62,7 +64,15 @@ def api_call[**_P, _R](
                     continue
 
                 logger.debug("API call to %s failed after %d retries", func, retries)
-                raise SensorPushCloudError from e
+                if isinstance(e, ApiException):
+                    # API exceptions provide a JSON-encoded message in the
+                    # body; otherwise, fall back to the general behavior.
+                    try:
+                        data = json.loads(e.body)
+                        raise SensorPushCloudError(data["message"]) from e
+                    except Exception:  # noqa: BLE001
+                        pass
+                raise SensorPushCloudError(e) from e
             else:
                 logger.debug("API call to %s succeeded after %d retries", func, retries)
                 return result
@@ -72,13 +82,6 @@ def api_call[**_P, _R](
 
 class SensorPushCloudApi:
     """SensorPush Cloud API class."""
-
-    email: str
-    password: str
-    configuration: Configuration
-    api: ApiApi
-    deadline: datetime
-    lock: Lock
 
     def __init__(self, hass: HomeAssistant, email: str, password: str) -> None:
         """Initialize the SensorPush Cloud API object."""
