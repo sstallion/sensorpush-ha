@@ -86,7 +86,3 @@ class SensorPushCloudHelper:
                     vapor_pressure=sample.vpd,
                 )
         return data
-
-    async def async_get_device_ids(self) -> Iterable[str]:
-        """Return the list of active device IDs."""
-        return (await self.api.async_sensors()).keys()

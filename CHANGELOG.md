@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improved exception message handling
 
+### Removed
+
+- Removed support for `async_get_device_ids()` in `SensorPushCloudHelper`
+
 ## [1.0.1] - 2024-12-28
 
 ### Fixed
