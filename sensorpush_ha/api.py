@@ -64,15 +64,13 @@ def api_call[**_P, _R](
                     continue
 
                 logger.debug("API call to %s failed after %d retries", func, retries)
+                # API exceptions provide a JSON-encoded message in the
+                # response body; otherwise, fall back to general behavior.
                 if isinstance(e, ApiException):
-                    # API exceptions provide a JSON-encoded message in the
-                    # body; otherwise, fall back to the general behavior.
-                    try:
-                        data = json.loads(e.body)
-                        raise SensorPushCloudError(data["message"]) from e
-                    except Exception:  # noqa: BLE001
-                        pass
-                raise SensorPushCloudError(e) from e
+                    data = json.loads(e.body)
+                    raise SensorPushCloudError(data["message"]) from e
+                else:
+                    raise SensorPushCloudError(e) from e
             else:
                 logger.debug("API call to %s succeeded after %d retries", func, retries)
                 return result
