@@ -11,6 +11,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.typing import StateType
 
 from .api import SensorPushCloudApi, SensorPushCloudError
 
@@ -34,7 +35,7 @@ class SensorPushCloudData(BaseModel):
     temperature: float | None
     vapor_pressure: float | None
 
-    def __getitem__(self, item) -> Any:
+    def __getitem__(self, item) -> StateType:
         """Return a data item."""
         return getattr(self, item)
 
