@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from aiohttp import ClientSession
 from asyncio import Lock
 from collections.abc import Awaitable, Callable, Coroutine, Mapping
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from functools import wraps
 import json
 import logging
@@ -22,10 +23,6 @@ from sensorpush_api import (
     Sensor,
     SensorsRequest,
 )
-
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.util import dt as dt_util
 
 ACCESS_TOKEN_EXPIRATION: Final = timedelta(minutes=60)
 REQUEST_RETRIES: Final = 3
@@ -55,7 +52,7 @@ def api_call[**_P, _R](
             except Exception as e:
                 # Force reauthorization if an exception occurs to avoid
                 # authorization failures after temporary outages.
-                self.deadline = dt_util.now()
+                self.deadline = datetime.now(UTC)
 
                 # The SensorPush Cloud API suffers from frequent exceptions;
                 # requests are retried before raising an error.
@@ -81,19 +78,19 @@ def api_call[**_P, _R](
 class SensorPushCloudApi:
     """SensorPush Cloud API class."""
 
-    def __init__(self, hass: HomeAssistant, email: str, password: str) -> None:
+    def __init__(self, email: str, password: str, clientsession: ClientSession = None) -> None:
         """Initialize the SensorPush Cloud API object."""
         self.email = email
         self.password = password
-        self.configuration = Configuration(pool_manager=async_get_clientsession(hass))
+        self.configuration = Configuration(pool_manager=clientsession)
         self.api = ApiApi(ApiClient(self.configuration))
-        self.deadline = dt_util.now()
+        self.deadline = datetime.now(UTC)
         self.lock = Lock()
 
     async def async_renew_access(self) -> None:
         """Renew an access token if it has expired."""
         async with self.lock:  # serialize authorize calls
-            if dt_util.now() >= self.deadline:
+            if datetime.now(UTC) >= self.deadline:
                 await self.async_authorize()
 
     @api_call
@@ -111,7 +108,7 @@ class SensorPushCloudApi:
             _request_timeout=REQUEST_TIMEOUT.total_seconds(),
         )
         self.configuration.api_key["oauth"] = access_response.accesstoken
-        self.deadline = dt_util.now() + ACCESS_TOKEN_EXPIRATION
+        self.deadline = datetime.now(UTC) + ACCESS_TOKEN_EXPIRATION
 
     @api_call
     async def async_sensors(self, *args: Any, **kwargs: Any) -> Mapping[str, Sensor]:
