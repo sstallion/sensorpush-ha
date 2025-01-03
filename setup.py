@@ -32,6 +32,7 @@ setup(name="sensorpush-ha",
       keywords="homeassistant sensorpush",
       package_data={"sensorpush_ha": ["py.typed"]},
       install_requires=[
+          "pydantic>=2.10.0",
           "sensorpush-api>=2.1.0",
       ],
       extras_require={
