@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-02-16
+
+### Changed
+
+- Improved authentication exception reporting
+
 ### Fixed
 
 - Fixed missing dependency (`pydantic`)
-- Improved authentication exception reporting
 
 ## [1.2.0] - 2025-01-02
 
@@ -50,7 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial release
 
-[Unreleased]: https://github.com/sstallion/sensorpush-ha/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/sstallion/sensorpush-ha/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/sstallion/sensorpush-ha/releases/tag/v1.3.0
 [1.2.0]: https://github.com/sstallion/sensorpush-ha/releases/tag/v1.2.0
 [1.1.2]: https://github.com/sstallion/sensorpush-ha/releases/tag/v1.1.2
 [1.1.1]: https://github.com/sstallion/sensorpush-ha/releases/tag/v1.1.1
