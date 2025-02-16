@@ -21,11 +21,12 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-from .api import SensorPushCloudApi, SensorPushCloudError
+from .api import SensorPushCloudApi, SensorPushCloudAuthError, SensorPushCloudError
 from .helper import SensorPushCloudData, SensorPushCloudHelper
 
 __all__ = [
     "SensorPushCloudApi",
+    "SensorPushCloudAuthError",
     "SensorPushCloudData",
     "SensorPushCloudError",
     "SensorPushCloudHelper",
