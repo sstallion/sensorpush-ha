@@ -90,7 +90,10 @@ def api_call[**_P, _R](
                 # response body; otherwise, fall back to general behavior.
                 if isinstance(e, ApiException):
                     data = json.loads(e.body)
-                    raise SensorPushCloudError(data["message"]) from e
+                    if 400 <= e.status <= 499:
+                        raise SensorPushCloudAuthError(data["message"]) from e
+                    else:
+                        raise SensorPushCloudError(data["message"]) from e
                 else:
                     raise SensorPushCloudError(e) from e
             else:
@@ -124,24 +127,16 @@ class SensorPushCloudApi:
         # SensorPush provides a simplified OAuth endpoint using access tokens
         # without refresh tokens. It is not possible to use 3rd party client
         # IDs without first contacting SensorPush support.
-        try:
-            auth_response = await self.api.oauth_authorize_post(
-                AuthorizeRequest(email=self.email, password=self.password),
-                _request_timeout=REQUEST_TIMEOUT.total_seconds(),
-            )
-            access_response = await self.api.access_token(
-                AccessTokenRequest(authorization=auth_response.authorization),
-                _request_timeout=REQUEST_TIMEOUT.total_seconds(),
-            )
-            self.configuration.api_key["oauth"] = access_response.accesstoken
-            self.deadline = datetime.now(UTC) + ACCESS_TOKEN_EXPIRATION
-        except SensorPushCloudError as e:
-            # The SensorPush API does not distinguish between different types
-            # of failures using status codes. For now, we assume any failure
-            # is due to invalid authentication, however in the future this
-            # should be updated to better reflect the true cause of failure
-            # without matching human readable error messages.
-            raise SensorPushCloudAuthError(e) from e;
+        auth_response = await self.api.oauth_authorize_post(
+            AuthorizeRequest(email=self.email, password=self.password),
+            _request_timeout=REQUEST_TIMEOUT.total_seconds(),
+        )
+        access_response = await self.api.access_token(
+            AccessTokenRequest(authorization=auth_response.authorization),
+            _request_timeout=REQUEST_TIMEOUT.total_seconds(),
+        )
+        self.configuration.api_key["oauth"] = access_response.accesstoken
+        self.deadline = datetime.now(UTC) + ACCESS_TOKEN_EXPIRATION
 
     @api_call
     async def async_sensors(self, *args: Any, **kwargs: Any) -> Mapping[str, Sensor]:
