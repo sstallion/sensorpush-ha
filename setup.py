@@ -6,7 +6,7 @@ with open(os.path.join(dirname, "README.md")) as f:
     long_description = f.read()
 
 setup(name="sensorpush-ha",
-      version="1.3.1",
+      version="1.3.2",
       description="SensorPush Cloud Home Assistant Library",
       long_description=long_description,
       long_description_content_type="text/markdown",
