@@ -83,7 +83,10 @@ class SensorPushCloudHelper:
             self.api.async_samples(limit=1),
         )
         for device_id, sensor in sensors.items():
-            sample = samples.sensors[device_id][0]
+            device_samples = samples.sensors.get(device_id)
+            if not device_samples:
+                continue
+            sample = device_samples[0]
             data[device_id] = SensorPushCloudData(
                 device_id=sensor.device_id,
                 manufacturer="SensorPush",

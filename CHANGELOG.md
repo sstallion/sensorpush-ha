@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Skip sensors without cloud samples instead of failing the entire data update
+
 ## [1.3.2] - 2025-02-16
 
 ### Fixed
