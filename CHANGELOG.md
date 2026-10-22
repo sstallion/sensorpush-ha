@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Declare Python 3.12 as the minimum supported version in package metadata
+- Preserve authentication errors and handle unexpected HTTP error bodies safely
+- Keep valid access tokens after connection or server failures
+- Avoid repeated retries of classified library errors and rejected HTTP requests
 
 ### Changed
 
