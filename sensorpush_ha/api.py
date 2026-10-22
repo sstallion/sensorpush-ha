@@ -60,6 +60,21 @@ class SensorPushCloudAuthError(SensorPushCloudError):
     """An auth exception occurred when calling the SensorPush Cloud API."""
 
 
+def _http_error(error: ApiException) -> SensorPushCloudError:
+    """Handle error responses without assuming a JSON body or message field."""
+    message = f"SensorPush Cloud HTTP {error.status}: {error.reason or 'request failed'}"
+    try:
+        data = json.loads(error.body)
+    except (TypeError, ValueError):
+        data = None
+    if isinstance(data, dict) and isinstance(data.get("message"), str) and data["message"]:
+        message = data["message"]
+    # Keep the existing classification of ambiguous SensorPush 400 responses.
+    if error.status in (400, 401, 403):
+        return SensorPushCloudAuthError(message)
+    return SensorPushCloudError(message)
+
+
 def api_call[**_P, _R](
     func: Callable[Concatenate[SensorPushCloudApi, _P], Awaitable[_R]],
 ) -> Callable[Concatenate[SensorPushCloudApi, _P], Coroutine[Any, Any, _R]]:
@@ -74,28 +89,26 @@ def api_call[**_P, _R](
         while True:
             try:
                 result = await func(self, *args, **kwargs)
+            except SensorPushCloudError:
+                # Do not restart retries for an already-classified failure,
+                # including a failed authorization inside a data call.
+                raise
             except Exception as e:
-                # Force reauthorization if an exception occurs to avoid
-                # authorization failures after temporary outages.
-                self.deadline = datetime.now(UTC)
+                if isinstance(e, ApiException):
+                    if e.status in (400, 401, 403):
+                        self.deadline = datetime.now(UTC)
+                    # Retrying a rejected request or rate limit will not help.
+                    if e.status in range(400, 500):
+                        raise _http_error(e) from e
 
-                # The SensorPush Cloud API suffers from frequent exceptions;
-                # requests are retried before raising an error.
                 if retries < REQUEST_RETRIES:
                     retries = retries + 1
                     continue
 
                 logger.debug("API call to %s failed after %d retries", func, retries)
-                # API exceptions provide a JSON-encoded message in the
-                # response body; otherwise, fall back to general behavior.
                 if isinstance(e, ApiException):
-                    data = json.loads(e.body)
-                    if 400 <= e.status <= 499:
-                        raise SensorPushCloudAuthError(data["message"]) from e
-                    else:
-                        raise SensorPushCloudError(data["message"]) from e
-                else:
-                    raise SensorPushCloudError(e) from e
+                    raise _http_error(e) from e
+                raise SensorPushCloudError(e) from e
             else:
                 logger.debug("API call to %s succeeded after %d retries", func, retries)
                 return result

@@ -5,9 +5,8 @@ don't have time to contribute!
 
 ## Making Changes
 
-> **Note**: This guide assumes you have a working Python installation (most
-> versions are supported) and have the Python Package Installer available in
-> the current user's $PATH.
+> **Note**: This guide assumes you have Python 3.12 or newer installed and have
+> the Python Package Installer available in the current user's $PATH.
 
 To get started, [fork][2] this repository on GitHub and clone a working copy for
 development:
@@ -25,6 +24,18 @@ development, issue:
 
     $ python -m pip install -e .
 
+Run the tests before submitting changes:
+
+    $ python -m unittest discover -s tests -v
+
+The tests use the standard library's `unittest` module and mocked cloud responses;
+no SensorPush account or credentials are needed. CI runs them on Python 3.12 and
+3.13, and the release workflow runs them before building and publishing.
+
+To check that the source distribution and wheel build successfully:
+
+    $ python -m pip install -e '.[release]'
+    $ python -m build
 
 If user-facing changes are introduced, be sure add an entry to the `Unreleased`
 section in [CHANGELOG.md][3].

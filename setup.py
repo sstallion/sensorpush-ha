@@ -14,6 +14,7 @@ setup(name="sensorpush-ha",
       author_email="sstallion@gmail.com",
       url="https://github.com/sstallion/sensorpush-ha",
       packages=find_packages(),
+      python_requires=">=3.12",
       classifiers=[
           "Development Status :: 5 - Production/Stable",
           "Environment :: Web Environment",
