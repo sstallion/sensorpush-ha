@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Declare Python 3.12 as the minimum supported version in package metadata
+
+### Changed
+
+- Run regression tests in CI and before publishing releases
+
 ## [1.3.3] - 2026-10-19
 
 ### Fixed
