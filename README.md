@@ -11,6 +11,8 @@ Gateway Cloud API][4] with [Home Assistant][5]. It is primarily used by the
 
 ## Installation
 
+Python 3.12 or newer is required.
+
 `sensorpush-ha` is available on [PyPI][2] and can be installed locally using the
 Python Package Installer:
 
