@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Use the device ID as the name for sensors without a name
+- Skip samples without an observation timestamp without blocking other sensors
+- Raise a library error when the samples response has no sensors mapping
+
 ## [1.3.3] - 2026-10-19
 
 ### Fixed
