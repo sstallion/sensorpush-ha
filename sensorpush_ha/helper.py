@@ -82,16 +82,20 @@ class SensorPushCloudHelper:
             self.api.async_sensors(),
             self.api.async_samples(limit=1),
         )
+        if samples.sensors is None:
+            raise SensorPushCloudError("Samples response is missing the sensors mapping")
         for device_id, sensor in sensors.items():
             device_samples = samples.sensors.get(device_id)
             if not device_samples:
                 continue
             sample = device_samples[0]
+            if sample.observed is None:
+                continue
             data[device_id] = SensorPushCloudData(
                 device_id=sensor.device_id,
                 manufacturer="SensorPush",
                 model=sensor.type,
-                name=sensor.name,
+                name=sensor.name or sensor.device_id,
                 altitude=sample.altitude,
                 atmospheric_pressure=sample.barometric_pressure,
                 battery_voltage=sensor.battery_voltage,
